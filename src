@@ -1,0 +1,43 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+tarefas = []
+
+# Criar tarefa
+@app.route('/tarefas', methods=['POST'])
+def criar_tarefa():
+    data = request.json
+    tarefa = {
+        'id': len(tarefas) + 1,
+        'titulo': data['titulo'],
+        'descricao': data['descricao'],
+        'status': 'A Fazer',
+        'prioridade': 'Média'
+    }
+    tarefas.append(tarefa)
+    return jsonify(tarefa), 201
+
+# Listar tarefas
+@app.route('/tarefas', methods=['GET'])
+def listar_tarefas():
+    return jsonify(tarefas)
+
+# Atualizar tarefa
+@app.route('/tarefas/<int:id>', methods=['PUT'])
+def atualizar_tarefa(id):
+    data = request.json
+    for t in tarefas:
+        if t['id'] == id:
+            t.update(data)
+            return jsonify(t)
+    return jsonify({'erro': 'Tarefa não encontrada'}), 404
+
+# Deletar tarefa
+@app.route('/tarefas/<int:id>', methods=['DELETE'])
+def deletar_tarefa(id):
+    global tarefas
+    tarefas = [t for t in tarefas if t['id'] != id]
+    return jsonify({'msg': 'Tarefa deletada'})
+
+if __name__ == '__main__':
+    app.run(debug=True)
